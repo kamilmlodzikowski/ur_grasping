@@ -17,7 +17,7 @@ from cv_bridge import CvBridge
 from geometry_msgs.msg import PoseStamped
 from sensor_msgs.msg import Image, CameraInfo
 from std_msgs.msg import Float32MultiArray
-from nav_msgs.msg import Path
+from geometry_msgs.msg import Pose
 from nav_msgs.msg import Odometry
 from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg import PoseStamped
@@ -43,7 +43,7 @@ img_pub = rospy.Publisher('ggcnn/img/img', Image, queue_size=1)
 grasp_plain_pub = rospy.Publisher('ggcnn/img/grasp_plain', Image, queue_size=1)
 depth_pub = rospy.Publisher('ggcnn/img/depth', Image, queue_size=1)
 ang_pub = rospy.Publisher('ggcnn/img/ang', Image, queue_size=1)
-cmd_pub = rospy.Publisher('/trajectory_planned', Path, queue_size=1)
+cmd_pub = rospy.Publisher('/grasp_pose', Pose, queue_size=1)
 
 # Initialise some globals.
 prev_mp = np.array([150, 150])
@@ -224,9 +224,9 @@ def depth_callback(depth_message):
         img_img_plain = grasp_img.copy()
 
         rr, cc = circle(prev_mp[0], prev_mp[1], 5)
-        img_img[rr+30, cc-11, 0] = 0
-        img_img[rr+30, cc-11, 1] = 255
-        img_img[rr+30, cc-11, 2] = 0
+        img_img[rr, cc, 0] = 0
+        img_img[rr, cc, 1] = 255
+        img_img[rr, cc, 2] = 0
 	print ('draw')
 
     with TimeIt('Publish'):
@@ -247,19 +247,17 @@ def depth_callback(depth_message):
 
         ang_pub.publish(bridge.cv2_to_imgmsg(ang_out))
 
-	path = Path()
-	pose = PoseStamped()
-	pose.pose.position.x = x/200.0
-	pose.pose.position.y = y/200.0
-	pose.pose.position.z = z/200.0
+	pose = Pose()
+	pose.position.x = x/200.0
+	pose.position.y = y/200.0
+	pose.position.z = z/200.0
 	#(qx, qy, qz, qw) = quaternion_from_euler (0, 0, ang)
-	pose.pose.orientation.x = 0
-	pose.pose.orientation.y = 0
-	pose.pose.orientation.z = 0
-	pose.pose.orientation.w = 1
+	pose.orientation.x = 0
+	pose.orientation.y = 0
+	pose.orientation.z = ang
+	pose.orientation.w = 0
 	print ('pub_nisko')
-	path.poses.append(pose)
-	cmd_pub.publish(path)
+	cmd_pub.publish(pose)
 
 
         # Output the best grasp pose relative to camera.

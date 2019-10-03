@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="controller_ur" name="controllerUR" type="controller_ur" output="screen"/>
+    <rosparam file="$(find controller_ur)/config/gazeboSim.yaml" />
+</launch>
