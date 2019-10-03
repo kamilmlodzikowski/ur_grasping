@@ -1,4 +1,0 @@
-force_sensor_topic: "/optoforce_0"
-controller_state: "/left_arm_controller/state"
-joint_goal: "/left_arm_controller/follow_joint_trajectory/goal"
-min_update_rate: 0.1
