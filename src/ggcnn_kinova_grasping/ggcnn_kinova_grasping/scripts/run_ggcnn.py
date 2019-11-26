@@ -49,7 +49,7 @@ fx = K[0]
 cx = K[2]
 fy = K[4]
 cy = K[5]
-
+print (" KAAAAAA:    ", K)
 
 # Execution Timing
 class TimeIt:
@@ -111,11 +111,11 @@ def depth_callback(depth_message):
         # Figure out roughly the depth in mm of the part between the grippers for collision avoidance.
         depth_center = depth_crop[100:141, 130:171].flatten()
         depth_center.sort()
-        depth_center = depth_center[:10].mean() * 1000.0
+        depth_center = depth_center[:10].mean()
 
     with TimeIt('Inference'):
         # Run it through the network.
-        depth_crop = np.clip((depth_crop - depth_crop.mean()), -1, 1)
+        depth_crop = np.clip((depth_crop - depth_crop.mean()*0.8), -1, 1)
         with graph.as_default():
             pred_out = model.predict(depth_crop.reshape((1, 300, 300, 1)))
 
@@ -139,7 +139,7 @@ def depth_callback(depth_message):
         # Calculate the best pose from the camera intrinsics.
         maxes = None
 
-        ALWAYS_MAX = False  # Use ALWAYS_MAX = True for the open-loop solution.
+        ALWAYS_MAX = False # Use ALWAYS_MAX = True for the open-loop solution.
 
         if ROBOT_Z > 0.34 or ALWAYS_MAX:  # > 0.34 initialises the max tracking when the robot is reset.
             # Track the global max.
@@ -165,9 +165,9 @@ def depth_callback(depth_message):
         point_depth = depth[max_pixel[0], max_pixel[1]]
 
         # These magic numbers are my camera intrinsic parameters.
-        x = (max_pixel[1] - cx)/(fx) * point_depth
-        y = (max_pixel[0] - cy)/(fy) * point_depth
-        z = point_depth
+        x = (max_pixel[1] - cx)/(fx) * point_depth /1000
+        y = (max_pixel[0] - cy)/(fy) * point_depth /1000
+        z = point_depth.astype(np.float32) /1000
 
         if np.isnan(z):
             return
@@ -201,11 +201,12 @@ def depth_callback(depth_message):
         # Output the best grasp pose relative to camera.
         cmd_msg = Float32MultiArray()
         cmd_msg.data = [x, y, z, ang, width, depth_center]
+        print ("DATA: ", cmd_msg.data)
         cmd_pub.publish(cmd_msg)
 
 
-depth_sub = rospy.Subscriber('/camera/depth/image_meters', Image, depth_callback, queue_size=1)
-robot_pos_sub = rospy.Subscriber('/m1n6s200_driver/out/tool_pose', PoseStamped, robot_pos_callback, queue_size=1)
+depth_sub = rospy.Subscriber('/camera/depth/image_rect_raw', Image, depth_callback, queue_size=1)
+robot_pos_sub = rospy.Subscriber('/UR5_pose', PoseStamped, robot_pos_callback, queue_size=1)
 
 while not rospy.is_shutdown():
     rospy.spin()
