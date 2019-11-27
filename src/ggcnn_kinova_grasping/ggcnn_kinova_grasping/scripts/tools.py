@@ -108,8 +108,9 @@ def get_pose(ip="192.168.1.211", port_write=30003, port_read=30002):
 
     tmp_matrix = [[matrix_from_axis[0][0], matrix_from_axis[0][1], matrix_from_axis[0][2], point[0]],
                   [matrix_from_axis[1][0], matrix_from_axis[1][1], matrix_from_axis[1][2], point[1]],
-                  [matrix_from_axis[0][0], matrix_from_axis[0][1], matrix_from_axis[0][2], point[2]],
+                  [matrix_from_axis[2][0], matrix_from_axis[2][1], matrix_from_axis[2][2], point[2]],
                   [0, 0, 0, 1]]
+    print ("TMPPPPPP: ",tmp_matrix)
     return tmp_matrix
 
 
