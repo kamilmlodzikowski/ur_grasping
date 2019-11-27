@@ -96,11 +96,8 @@ def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, p
 def get_pose(ip="192.168.1.211", port_write=30003, port_read=30002):
     manipulator = robot_controller.Ur3(ip, port_write, port_read)
     pose = manipulator.get_pose()
-    inv_matrix = np.linalg.inv(matrix)
 
     point = [pose[0], pose[1], pose[2], 1]
-    n_point = np.matmul(inv_matrix, point)
-    point = np.matmul(inv_matrix, point)
     rotation = [pose[3], pose[4], pose[5]]
     r = Rotation.from_rotvec(rotation)
 
@@ -110,7 +107,7 @@ def get_pose(ip="192.168.1.211", port_write=30003, port_read=30002):
                   [matrix_from_axis[1][0], matrix_from_axis[1][1], matrix_from_axis[1][2], point[1]],
                   [matrix_from_axis[2][0], matrix_from_axis[2][1], matrix_from_axis[2][2], point[2]],
                   [0, 0, 0, 1]]
-    print ("TMPPPPPP: ",tmp_matrix)
+    print ("TMPPPPPP: ", tmp_matrix)
     return tmp_matrix
 
 
