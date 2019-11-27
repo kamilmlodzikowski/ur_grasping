@@ -6,21 +6,57 @@ import random
 import time
 from scipy.spatial.transform import Rotation
 
+matrix = [[1, 0, 0, -0.172],
+          [0, 0.707, 0.707, 0.359],
+          [0, -0.707, 0.707, 0.534],
+          [0, 0, 0, 1]]
+
 
 def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
 
+    c = np.cos(pose_g.data[3])
+    s = np.sin(pose_g.data[3])
     manipulator = robot_controller.Ur3(ip, port_write, port_read)
     akt_pose = get_pose()
-    pose_matrix = [[akt_pose[0], 0, 0, akt_pose[3]],
-                   [0, akt_pose[1], 0, akt_pose[4]],
-                   [0, 0, akt_pose[2], akt_pose[5]],
-                   [0, 0, 0, 1]]
-    pose_gcnn = [[pose_g[0], 0, 0, 0],
-                 [0, pose_g[1], 0, 0],
-                 [0, 0, pose_g[2], pose_g[5]],
+    # pose_matrix = [[1, 0, 0, akt_pose[0]],
+    #                [0, 1, 0, akt_pose[1]],
+    #                [0, 0, 1, akt_pose[2]],
+    #                [0, 0, 0, 1]]
+    # eulerx = get_pose()[3]
+    # eulery = get_pose()[4]
+    # eulerz = get_pose()[5]
+    # matrix_x = [[1, 0, 0, 0],
+    #             [0, np.cos(eulerx), -np.sin(eulerx), 0],
+    #             [0, np.sin(eulerx), np.cos(eulerx), 0],
+    #             [0, 0, 0, 1]]
+    #
+    # matrix_y = [[np.cos(eulery), 0, np.sin(eulery), 0],
+    #             [0, 1, 0, 0],
+    #             [-np.sin(eulery), 0, np.cos(eulery), 0],
+    #             [0, 0, 0, 1]]
+    #
+    # matrix_z = [[np.cos(eulerz), -np.sin(eulerz), 0, 0],
+    #             [np.sin(eulerz), np.cos(eulerz), 0, 0],
+    #             [0, 0, 1, 0],
+    #             [0, 0, 0, 1]]
+
+    # rot_matrix = np.matmul(matrix_x, matrix_y)
+    # rot_matrix = np.matmul(rot_matrix, matrix_z)
+    # pose_matrix = np.matmul(pose_matrix, rot_matrix)
+
+    rotz = [[1, 0, 0, 0],
+            [0, 0.707, 0.707, 0],
+            [0, -0.707, 0.707, 0],
+            [0, 0, 0, 1]]
+
+    new_matrix = np.matmul(akt_pose, rotz)
+    pose_gcnn = [[c, -s, 0, pose_g.data[0]],
+                 [s, c, 0, pose_g.data[1]],
+                 [0, 0, 1, pose_g.data[2]],
                  [0, 0, 0, 1]]
 
-    new_matrix = np.matmul(pose_matrix, pose_gcnn)
+
+    new_matrix = np.matmul(new_matrix, pose_gcnn)
 
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
@@ -74,23 +110,7 @@ def get_pose(ip="192.168.1.211", port_write=30003, port_read=30002):
                   [matrix_from_axis[1][0], matrix_from_axis[1][1], matrix_from_axis[1][2], point[1]],
                   [matrix_from_axis[0][0], matrix_from_axis[0][1], matrix_from_axis[0][2], point[2]],
                   [0, 0, 0, 1]]
-    try:
-        tmp_matrix = np.linalg.inv(tmp_matrix)
-    except:
-        tmp_matrix = tmp_matrix
-    new_mat = np.matmul(tmp_matrix, inv_matrix)
-    #print new_mat
-
-    tmp_matrix2 = [[tmp_matrix[0][0], tmp_matrix[0][1], tmp_matrix[0][2]],
-                   [tmp_matrix[1][0], tmp_matrix[1][1], tmp_matrix[1][2]],
-                   [tmp_matrix[2][0], tmp_matrix[2][1], tmp_matrix[2][2]]]
-
-    new_r = Rotation.from_dcm(tmp_matrix2)
-
-    euler = new_r.as_euler("XYZ", degrees=False)
-    new_pose = [n_point[0], n_point[1], n_point[2], euler[0], euler[1], euler[2]]
-    #print ("LALALA: ", new_pose)
-    return new_pose
+    return tmp_matrix
 
 
 def get_joints(ip="192.168.1.211", port_write=30003, port_read=30002):
