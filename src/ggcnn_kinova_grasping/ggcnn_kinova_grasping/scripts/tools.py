@@ -6,38 +6,25 @@ import random
 import time
 from scipy.spatial.transform import Rotation
 
-matrix = [[1, 0, 0, -0.172],
-          [0, 0.707, 0.707, 0.359],
-          [0, -0.707, 0.707, 0.534],
-          [0, 0, 0, 1]]
 
+def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
 
-def move(point, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
     manipulator = robot_controller.Ur3(ip, port_write, port_read)
+    akt_pose = get_pose()
+    pose_matrix = [[akt_pose[0], 0, 0, akt_pose[3]],
+                   [0, akt_pose[1], 0, akt_pose[4]],
+                   [0, 0, akt_pose[2], akt_pose[5]],
+                   [0, 0, 0, 1]]
+    pose_gcnn = [[pose_g[0], 0, 0, 0],
+                 [0, pose_g[1], 0, 0],
+                 [0, 0, pose_g[2], pose_g[5]],
+                 [0, 0, 0, 1]]
 
-    # if point[0] > -0.035 and point[1] > -0.197:
-    #     rot_z = random_z(0, 1.57)
+    new_matrix = np.matmul(pose_matrix, pose_gcnn)
 
-    c = np.cos(rot_z)
-    s = np.sin(rot_z)
-
-    matB = [[1, 0, 0, point[0]],
-            [0, 1, 0, point[1]],
-            [0, 0, 1, point[2]],
-            [0, 0, 0, 1]]
-
-    matrix_z = [[c, -s, 0, 0],
-                [s, c, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1]]
-    tmp_mat = np.matmul(matrix, matB)
-
-    res_mat = np.matmul(tmp_mat, matrix_z)
-
-    mat_to_calc = [[res_mat[0][0], res_mat[0][1], res_mat[0][2]],
-                   [res_mat[1][0], res_mat[1][1], res_mat[1][2]],
-                   [res_mat[2][0], res_mat[2][1], res_mat[2][2]]]
-
+    mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
+                   [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
+                   [new_matrix[2][0], new_matrix[2][1], new_matrix[2][2]]]
     fi = np.arccos((np.trace(mat_to_calc) - 1) / 2)
     ux = 1 / (2 * np.sin(fi)) * (mat_to_calc[2][1] - mat_to_calc[1][2])
     uy = 1 / (2 * np.sin(fi)) * (mat_to_calc[0][2] - mat_to_calc[2][0])
@@ -47,7 +34,7 @@ def move(point, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, po
     ry = uy * fi
     rz = uz * fi
 
-    pose_goal = [tmp_mat[0][3], tmp_mat[1][3], tmp_mat[2][3], rx, ry, rz]
+    pose_goal = [new_matrix[0][3], new_matrix[1][3], new_matrix[2][3], rx, ry, rz]
     pose_goal = np.transpose(pose_goal)
     trajectory = list()
     trajectory.append(pose_goal)
