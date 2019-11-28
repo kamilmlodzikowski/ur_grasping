@@ -14,8 +14,9 @@ def convert_pose():
 
 
 def move(pose_g):
-    tools.move(pose_g, rot_z=0, a=0.01, v=0.03, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
-    tools.get_pose()
+    if not (pose_g.data[0] == 0 or pose_g.data[1] == 0 or pose_g.data[2] == 0):
+        tools.move(pose_g, rot_z=0, a=0.01, v=0.03, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
+        tools.get_pose()
 
 Pose = rospy.Publisher('/UR5_pose', PoseStamped, queue_size=1)
 pose_goal = rospy.Subscriber('/ggcnn/out/command', Float32MultiArray, move, queue_size=1)
