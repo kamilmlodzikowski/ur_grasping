@@ -44,19 +44,18 @@ def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, p
     # rot_matrix = np.matmul(rot_matrix, matrix_z)
     # pose_matrix = np.matmul(pose_matrix, rot_matrix)
 
-    rotz = [[1, 0, 0, 0],
-            [0, 0.707, 0.707, 0],
-            [0, -0.707, 0.707, 0],
+    rotz = [[1, 0, 0, akt_pose[0]],
+            [0, 0.707, 0.707, akt_pose[1]],
+            [0, -0.707, 0.707, akt_pose[2]],
             [0, 0, 0, 1]]
 
-    new_matrix = np.matmul(akt_pose, rotz)
-    pose_gcnn = [[c, -s, 0, pose_g.data[0]],
-                 [s, c, 0, pose_g.data[1]],
-                 [0, 0, 1, pose_g.data[2]],
+    pose_gcnn = [[c, -s, 0, pose_g.data[0]-0.035],
+                 [s, c, 0, -pose_g.data[1]+0.08],
+                 [0, 0, 1, pose_g.data[2]-0.13],
                  [0, 0, 0, 1]]
 
 
-    new_matrix = np.matmul(new_matrix, pose_gcnn)
+    new_matrix = np.matmul(rotz, pose_gcnn)
 
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
@@ -86,7 +85,7 @@ def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, p
         pos_akt = np.round(akt_to_round, 3)
         time_now = time.time()
         passed = int(time_now - time_before )
-        if passed > 10:
+        if passed > 0.1:
             return -1
     # if check_joits_TF:
     #     check_joints(ip, port_write, port_read)
@@ -97,18 +96,19 @@ def get_pose(ip="192.168.1.211", port_write=30003, port_read=30002):
     manipulator = robot_controller.Ur3(ip, port_write, port_read)
     pose = manipulator.get_pose()
 
-    point = [pose[0], pose[1], pose[2], 1]
-    rotation = [pose[3], pose[4], pose[5]]
-    r = Rotation.from_rotvec(rotation)
-
-    matrix_from_axis = r.as_dcm()
-
-    tmp_matrix = [[matrix_from_axis[0][0], matrix_from_axis[0][1], matrix_from_axis[0][2], point[0]],
-                  [matrix_from_axis[1][0], matrix_from_axis[1][1], matrix_from_axis[1][2], point[1]],
-                  [matrix_from_axis[2][0], matrix_from_axis[2][1], matrix_from_axis[2][2], point[2]],
-                  [0, 0, 0, 1]]
-    print ("TMPPPPPP: ", tmp_matrix)
-    return tmp_matrix
+    # point = [pose[0], pose[1], pose[2], 1]
+    # rotation = [pose[3], pose[4], pose[5]]
+    # r = Rotation.from_rotvec(rotation)
+    #
+    # matrix_from_axis = r.as_dcm()
+    #
+    # tmp_matrix = [[matrix_from_axis[0][0], matrix_from_axis[0][1], matrix_from_axis[0][2], point[0]],
+    #               [matrix_from_axis[1][0], matrix_from_axis[1][1], matrix_from_axis[1][2], point[1]],
+    #               [matrix_from_axis[2][0], matrix_from_axis[2][1], matrix_from_axis[2][2], point[2]],
+    #               [0, 0, 0, 1]]
+    # print ("TMPPPPPP: ", tmp_matrix)
+    # return tmp_matrix
+    return pose
 
 
 def get_joints(ip="192.168.1.211", port_write=30003, port_read=30002):
