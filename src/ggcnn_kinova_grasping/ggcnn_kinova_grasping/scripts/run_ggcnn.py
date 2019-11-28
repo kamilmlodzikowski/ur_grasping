@@ -84,7 +84,7 @@ def depth_callback(depth_message):
         depth = bridge.imgmsg_to_cv2(depth_message)
 
         # Crop a square out of the middle of the depth and resize it to 300*300
-        crop_size = 350
+        crop_size = 400
         depth_crop = cv2.resize(depth[(480-crop_size)//2:(480-crop_size)//2+crop_size, (640-crop_size)//2:(640-crop_size)//2+crop_size], (300, 300))
 
         # Replace nan with 0 for inpainting.
@@ -115,7 +115,7 @@ def depth_callback(depth_message):
 
     with TimeIt('Inference'):
         # Run it through the network.
-        depth_crop = np.clip((depth_crop - depth_crop.mean()*0.8), -1, 1)
+        depth_crop = np.clip((depth_crop - depth_crop.mean()*0.7), -1, 1)
         with graph.as_default():
             pred_out = model.predict(depth_crop.reshape((1, 300, 300, 1)))
 

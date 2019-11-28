@@ -17,12 +17,19 @@ def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, p
             [0, -0.707, 0.707, akt_pose[2]],
             [0, 0, 0, 1]]
 
-    pose_gcnn = [[c, -s, 0, -pose_g.data[0]-0.035],
-                 [s, c, 0,-pose_g.data[1]+0.08],
+    pose_gcnn = [[1, 0, 0, -pose_g.data[0]],
+                 [0, 1, 0, -pose_g.data[1]+0.06],
                  [0, 0, 1, pose_g.data[2]-0.13],
                  [0, 0, 0, 1]]
 
     new_matrix = np.matmul(rotz, pose_gcnn)
+
+    # translation = [[c, -s, 0, pose_g.data[0]+0.035],
+    #              [s, c, 0, -pose_g.data[1]+0.08],
+    #              [0, 0, 1, pose_g.data[2]-0.13],
+    #              [0, 0, 0, 1]]
+
+    # new_matrix = np.matmul(new_matrix, translation)
 
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
@@ -52,7 +59,7 @@ def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, p
         pos_akt = np.round(akt_to_round, 3)
         time_now = time.time()
         passed = int(time_now - time_before )
-        if passed > 0.3:
+        if passed > 0.2:
             return -1
     return 0
 
