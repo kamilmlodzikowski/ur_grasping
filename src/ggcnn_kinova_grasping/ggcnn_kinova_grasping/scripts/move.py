@@ -6,16 +6,18 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float32MultiArray
 import time
 import robot_controller
-
-rospy.init_node('move')
+print 1
+rospy.init_node('movee')
+print 2
 manipulator = robot_controller.Ur3("192.168.1.211", 30003, 30002)
+print 3
 time.sleep(5)
 
 last_z = 1000
 
 suma = 0
 i = 0
-
+print "lalala"
 
 def convert_pose():
     pose = PoseStamped()
@@ -42,7 +44,7 @@ pose_goal = rospy.Subscriber('/ggcnn/out/command', Float32MultiArray, move, queu
 
 # msg1 = rospy.wait_for_message('/ggcnn/out/command', Float32MultiArray)
 # move(msg1)
-
+print "babababa"
 while not rospy.is_shutdown():
     rospy.spin()
 
