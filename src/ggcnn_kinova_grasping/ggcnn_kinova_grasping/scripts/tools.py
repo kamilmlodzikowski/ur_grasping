@@ -5,12 +5,10 @@ import robot_controller
 import time
 
 
-def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
+def move(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
     c = np.cos(pose_g.data[3])
     s = np.sin(pose_g.data[3])
-
-    manipulator = robot_controller.Ur3(ip, port_write, port_read)
-    akt_pose = get_pose()
+    akt_pose = get_pose(manipulator)
 
     rotz = [[1, 0, 0, akt_pose[0]],
             [0, 0.707, 0.707, akt_pose[1]],
@@ -54,18 +52,18 @@ def move(pose_g, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, p
     pos_cel = np.round(pose_goal, 3)
     time_before = time.time()
 
-    while pos_akt[0] != pos_cel[0] or pos_akt[1] != pos_cel[1] or pos_akt[2] != pos_cel[2] or pos_akt[3] != pos_cel[3] or pos_akt[4] != pos_cel[4] or pos_akt[5] != pos_cel[5]:
-        akt_to_round = manipulator.get_pose()
-        pos_akt = np.round(akt_to_round, 3)
-        time_now = time.time()
-        passed = int(time_now - time_before )
-        if passed > 0.2:
-            return -1
+    # while pos_akt[0] != pos_cel[0] or pos_akt[1] != pos_cel[1] or pos_akt[2] != pos_cel[2] or pos_akt[3] != pos_cel[3] or pos_akt[4] != pos_cel[4] or pos_akt[5] != pos_cel[5]:
+    #     akt_to_round = manipulator.get_pose()
+    #     pos_akt = np.round(akt_to_round, 3)
+    #     time_now = time.time()
+    #     passed = int(time_now - time_before )
+    #     if passed > 0.1:
+    #         return -1
     return 0
 
 
-def get_pose(ip="192.168.1.211", port_write=30003, port_read=30002):
-    manipulator = robot_controller.Ur3(ip, port_write, port_read)
+def get_pose(manipulator, ip="192.168.1.211", port_write=30003, port_read=30002):
+    # manipulator = robot_controller.Ur3(ip, port_write, port_read)
     pose = manipulator.get_pose()
     return pose
 

@@ -115,7 +115,7 @@ def depth_callback(depth_message):
 
     with TimeIt('Inference'):
         # Run it through the network.
-        depth_crop = np.clip((depth_crop - depth_crop.mean()*0.7), -1, 1)
+        depth_crop = np.clip((depth_crop - depth_crop.mean()), -1, 1)
         with graph.as_default():
             pred_out = model.predict(depth_crop.reshape((1, 300, 300, 1)))
 
