@@ -15,7 +15,7 @@ last_z = 1000
 suma = 0
 i = 0
 print "lalala"
-
+ok = False
 
 def convert_pose():
     pose = PoseStamped()
@@ -25,16 +25,23 @@ def convert_pose():
 
 def move(pose_g):
     global last_z
+    global ok
     global time_before
-    if not (pose_g.data[0] == 0 or pose_g.data[1] == 0 or pose_g.data[2] == 0.15 or last_z - pose_g.data[2] < 0.05):
+    if not (pose_g.data[0] == 0 or pose_g.data[1] == 0 or pose_g.data[2] <= 0.15 or pose_g.data[2] > last_z):
         tools.move2(pose_g, manipulator, rot_z=0, a=0.01, v=0.05, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
         last_z = pose_g.data[2]
         time_before = time.time()
+        ok = True
     else:
+        print "else"
         time_now = time.time()
-        passed = int(time_now - time_before)
-        if passed > 3:
-            manipulator.grip(5)
+        if ok == True:
+            passed = int(time_now - time_before)
+            print passed
+            if passed > 3:
+                print "ZACISKAM"
+                manipulator.grip(0)
+                ok = False
 
 
 Pose = rospy.Publisher('/UR5_pose', PoseStamped, queue_size=1)

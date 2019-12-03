@@ -10,20 +10,28 @@ def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_
 
     akt_pose = get_pose(manipulator)
     akt_z = get_z_orienation(manipulator)
-    rotz = [[1, 0, 0, akt_pose[0]],
+    rot_x = [[1, 0, 0, akt_pose[0]],
             [0, 0.707, 0.707, akt_pose[1]],
             [0, -0.707, 0.707, akt_pose[2]],
             [0, 0, 0, 1]]
 
-    c = np.cos(akt_z+pose_g.data[3])
-    s = np.sin(akt_z+pose_g.data[3])
+    c = np.cos(akt_z-pose_g.data[3])
+    s = np.sin(akt_z-pose_g.data[3])
+    print ("AKT Z: ", akt_z)
 
-    pose_gcnn = [[c, -s, 0, -pose_g.data[0]],
-                 [s, c, 0, -pose_g.data[1]+0.06],
+    pose_ggcnn = [[1, 0, 0, -pose_g.data[0]],
+                 [0, 1, 0, -pose_g.data[1]+0.06],
                  [0, 0, 1, pose_g.data[2]-0.13],
                  [0, 0, 0, 1]]
 
-    new_matrix = np.matmul(rotz, pose_gcnn)
+    newish_matrix = np.matmul(rot_x, pose_ggcnn)
+
+    orientation_ggcnn = [[c, -s, 0, 0],
+                        [s, c, 0, 0],
+                        [0, 0, 1, 0],
+                        [0, 0, 0, 1]]
+
+    new_matrix = np.matmul(newish_matrix, orientation_ggcnn)
 
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
