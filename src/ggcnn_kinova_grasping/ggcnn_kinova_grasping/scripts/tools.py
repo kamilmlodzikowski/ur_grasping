@@ -3,17 +3,11 @@
 import numpy as np
 import robot_controller
 import time
-import socket
-import move
 from scipy.spatial.transform import Rotation
-
-
 
 
 def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
 
-    move.suma += pose_g.data[4]
-    move.i += 1
     akt_pose = get_pose(manipulator)
     akt_z = get_z_orienation(manipulator)
     rotz = [[1, 0, 0, akt_pose[0]],
@@ -51,10 +45,10 @@ def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_
     trajectory.append(pose_goal)
     manipulator.move(trajectory, False, a=a, v=v)
 
-    akt_to_round = manipulator.get_pose()
-    pos_akt = np.round(akt_to_round, 3)
-    pos_cel = np.round(pose_goal, 3)
-    time_before = time.time()
+    # akt_to_round = manipulator.get_pose()
+    # pos_akt = np.round(akt_to_round, 3)
+    # pos_cel = np.round(pose_goal, 3)
+    # time_before = time.time()
 
     # while pos_akt[0] != pos_cel[0] or pos_akt[1] != pos_cel[1] or pos_akt[2] != pos_cel[2] or pos_akt[3] != pos_cel[3] or pos_akt[4] != pos_cel[4] or pos_akt[5] != pos_cel[5]:
     #     akt_to_round = manipulator.get_pose()
@@ -64,20 +58,7 @@ def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_
     #     if passed > 0.2:
     #         return -1
 
-    while pos_akt[0] == pos_cel[0] and pos_akt[1] == pos_cel[1] and pos_akt[2] == pos_cel[2]:
-        time_now = time.time()
-        passed = int(time_now - time_before )
-        if passed > 3:
-            srednia = move.suma/move.i
-            manipulator.grip(srednia)
-
-        else:
-            return -1
-
     return 0
-
-
-
 
 
 def get_pose(manipulator):
