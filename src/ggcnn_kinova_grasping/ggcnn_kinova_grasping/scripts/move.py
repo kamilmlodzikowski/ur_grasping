@@ -12,9 +12,6 @@ manipulator = robot_controller.Ur3("192.168.1.211", 30003, 30002)
 time.sleep(5)
 
 last_z = 1000
-suma = 0
-i = 0
-print "lalala"
 ok = False
 
 def convert_pose():
@@ -39,18 +36,16 @@ def move(pose_g):
             passed = int(time_now - time_before)
             print passed
             if passed > 3:
+                time.sleep(0.5)
                 print "ZACISKAM"
                 manipulator.grip(0)
+                time.sleep(2)
                 ok = False
 
 
 Pose = rospy.Publisher('/UR5_pose', PoseStamped, queue_size=1)
 pose_goal = rospy.Subscriber('/ggcnn/out/command', Float32MultiArray, move, queue_size=1)
 
-
-# msg1 = rospy.wait_for_message('/ggcnn/out/command', Float32MultiArray)
-# move(msg1)
-print "babababa"
 while not rospy.is_shutdown():
     rospy.spin()
 
