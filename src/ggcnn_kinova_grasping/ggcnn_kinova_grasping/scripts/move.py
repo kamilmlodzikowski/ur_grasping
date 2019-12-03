@@ -5,6 +5,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float32MultiArray
 import time
+import robot_controller
 
 rospy.init_node('move')
 manipulator = robot_controller.Ur3("192.168.1.211", 30003, 30002)
@@ -24,6 +25,7 @@ def convert_pose():
 
 def move(pose_g):
     global last_z
+    print("TESTETETETETETEEST")
     if not (pose_g.data[0] == 0 or pose_g.data[1] == 0 or pose_g.data[2] == 0.15 or last_z - pose_g.data[2] < 0.05):
         tools.move2(pose_g, manipulator, rot_z=0, a=0.01, v=0.05, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
         last_z = pose_g.data[2]
