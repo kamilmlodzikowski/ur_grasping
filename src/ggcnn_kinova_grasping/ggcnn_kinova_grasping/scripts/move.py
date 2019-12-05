@@ -7,7 +7,7 @@ from std_msgs.msg import Float32MultiArray
 import time
 import robot_controller
 
-rospy.init_node('movee')
+rospy.init_node('move')
 manipulator = robot_controller.Ur3("192.168.1.211", 30003, 30002)
 time.sleep(5)
 
@@ -30,14 +30,12 @@ def move(pose_g):
         time_before = time.time()
         ok = True
     else:
-        print "else"
         time_now = time.time()
         if ok == True:
             passed = int(time_now - time_before)
             print passed
             if passed > 3:
                 time.sleep(0.5)
-                print "ZACISKAM"
                 manipulator.grip(0)
                 time.sleep(2)
                 ok = False
