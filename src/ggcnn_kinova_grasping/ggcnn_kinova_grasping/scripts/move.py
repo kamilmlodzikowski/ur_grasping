@@ -14,6 +14,9 @@ time.sleep(5)
 last_z = 1000
 ok = False
 
+box = tools.set_box(manipulator)
+start = tools.set_start(manipulator)
+
 def convert_pose():
     pose = PoseStamped()
     pose.pose.position.z = tools.get_pose(manipulator)[2]
@@ -38,6 +41,11 @@ def move(pose_g):
                 time.sleep(0.5)
                 manipulator.grip(0)
                 time.sleep(2)
+                teraz = tools.get_pose(manipulator)
+                teraz[2] -= 15
+                tools.move2(teraz, manipulator, rot_z=0, a=0.01, v=0.05, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
+                tools.goto(box, manipulator)
+                tools.goto(start, manipulator)
                 ok = False
 
 

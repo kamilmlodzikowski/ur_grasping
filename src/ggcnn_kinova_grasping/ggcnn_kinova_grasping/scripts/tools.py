@@ -146,7 +146,14 @@ def set_box(manipulator):
     return pose
 
 
-def goto_box(pose, manipulator):
+def set_start(manipulator):
+    print("Move arm to start position")
+    raw_input("Press enter...")
+    pose = manipulator.get_pose()
+    return pose
+
+
+def goto(pose, manipulator):
     trajectory = list()
     trajectory.append(pose)
     manipulator.move(trajectory, False, a=0.1, v=0.8)
