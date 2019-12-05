@@ -152,6 +152,8 @@ def goto(pose, manipulator):
 
 
 def set_table_z(manipulator):
+    print("Touch the table with arm")
+    raw_input("Press enter...")
     akt_pose = get_pose(manipulator)
     rot_x = [[1, 0, 0, 0],
              [0, 0.707, 0.707, 0],
