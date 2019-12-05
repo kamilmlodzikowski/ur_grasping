@@ -30,7 +30,7 @@ def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_
                  [0, 0, 1, pose_g.data[2]-0.13],
                  [0, 0, 0, 1]]
 
-    newish_matrix = np.matmul(orientation_akt, pose_ggcnn)
+    newish_matrix = np.matmul(akt_matrix, pose_ggcnn)
     c = np.cos(-pose_g.data[3])
     s = np.sin(-pose_g.data[3])
 
