@@ -170,4 +170,5 @@ def goto(pose, manipulator):
         if passed > 15:
             return -1
 
-    manipulator.grip(15)
+    manipulator.grip(150)
+    time.sleep(2)
