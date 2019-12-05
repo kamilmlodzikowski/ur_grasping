@@ -7,7 +7,7 @@ from scipy.spatial.transform import Rotation
 from std_msgs.msg import Float32MultiArray
 
 
-def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
+def move2(pose_g, manipulator, min_z, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF = True):
 
     akt_pose = get_pose(manipulator)
     akt_z = get_z_orienation(manipulator)
@@ -41,6 +41,8 @@ def move2(pose_g, manipulator, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211", port_
                         [0, 0, 0, 1]]
 
     new_matrix = np.matmul(newish_matrix, orientation_ggcnn)
+    if new_matrix[2][3] > min_z:
+        new_matrix[2][3] = min_z
 
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
@@ -114,31 +116,6 @@ def get_joints(manipulator):
     return joints
 
 
-def check_joints(ip="192.168.1.211", port_write=30003, port_read=30002):
-    manipulator = robot_controller.Ur3(ip, port_write, port_read)
-    joints_read = list(manipulator.get_joints())
-    if joints_read[5] > np.pi:
-        joints_read[5] -= 2*np.pi
-    if joints_read[5] < -np.pi:
-        joints_read[5] += 2*np.pi
-    joints = np.copy(joints_read)
-    trajectory = list()
-    trajectory.append(joints)
-    manipulator.move(trajectory, is_movej=True, is_pose=False, a=0.2, v=0.6)
-    pos_akt = manipulator.get_joints()
-    pos_akt = np.round(pos_akt, 2)
-    joints = np.round(joints, 2)
-    time_before = time.time()
-    rob = True
-    while rob and (pos_akt[0] != joints[0] or pos_akt[1] != joints[1] or pos_akt[2] != joints[2] or pos_akt[3] != joints[3] or pos_akt[4] != joints[4] or pos_akt[5] != joints[5]):
-        akt_to_round = manipulator.get_joints()
-        pos_akt = np.round(akt_to_round, 2)
-        time_now = time.time()
-        passed = int(time_now - time_before)
-        if passed > 10:
-            rob = False
-
-
 def set_box(manipulator):
     print("Move arm to box position")
     raw_input("Press enter...")
@@ -172,3 +149,37 @@ def goto(pose, manipulator):
 
     manipulator.grip(150)
     time.sleep(2)
+
+
+def set_table_z(manipulator):
+    akt_pose = get_pose(manipulator)
+    rot_x = [[1, 0, 0, 0],
+             [0, 0.707, 0.707, 0],
+             [0, -0.707, 0.707, 0],
+             [0, 0, 0, 1]]
+    akt_pose = [[1, 0, 0, akt_pose[0]],
+                [0, 1, 0, akt_pose[1]],
+                [0, 0, 1, akt_pose[2]],
+                [0, 0, 0, 1]]
+    calc_pose = np.matmul(akt_pose, rot_x)
+    return calc_pose[2][3]
+
+
+def check_joints(manipulator):
+    joints = manipulator.get_joints
+    joints = np.delete(joints, 5)
+    joints = np.append(joints, 0)
+    trajectory = list()
+    trajectory.append(joints)
+    manipulator.move(trajectory, is_movej=True, is_pose=False, a=0.2, v=0.6)
+    pos_akt = manipulator.get_joints()
+    pos_akt = np.round(pos_akt, 2)
+    joints = np.round(joints, 2)
+    time_before = time.time()
+    while pos_akt[5] != joints[5]:
+        akt_to_round = manipulator.get_joints()
+        pos_akt = np.round(akt_to_round, 2)
+        time_now = time.time()
+        passed = int(time_now - time_before)
+        if passed > 10:
+            return -1
