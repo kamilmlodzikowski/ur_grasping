@@ -26,6 +26,9 @@ def move2(pose_g, manipulator, min_z, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211"
 
     akt_matrix = np.matmul(rot_x, orientation_akt)
 
+    if pose_g.data[2]-0.13 > min_z:
+        pose_g.data[2] = min_z + 0.13
+
     pose_ggcnn = [[1, 0, 0, -pose_g.data[0]],
                  [0, 1, 0, -pose_g.data[1]+0.06],
                  [0, 0, 1, pose_g.data[2]-0.13],
@@ -41,8 +44,7 @@ def move2(pose_g, manipulator, min_z, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211"
                         [0, 0, 0, 1]]
 
     new_matrix = np.matmul(newish_matrix, orientation_ggcnn)
-    if new_matrix[2][3] > min_z:
-        new_matrix[2][3] = min_z
+
 
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
@@ -127,6 +129,7 @@ def set_start(manipulator):
     print("Move arm to start position")
     raw_input("Press enter...")
     pose = manipulator.get_pose()
+    manipulator.grip(150)
     return pose
 
 
@@ -152,6 +155,8 @@ def goto(pose, manipulator):
 
 
 def set_table_z(manipulator):
+    manipulator.grip(0)
+    time.sleep(3)
     print("Touch the table with arm")
     raw_input("Press enter...")
     akt_pose = get_pose(manipulator)
@@ -168,20 +173,21 @@ def set_table_z(manipulator):
 
 
 def check_joints(manipulator):
-    joints = manipulator.get_joints
-    joints = np.delete(joints, 5)
-    joints = np.append(joints, 0)
-    trajectory = list()
-    trajectory.append(joints)
-    manipulator.move(trajectory, is_movej=True, is_pose=False, a=0.2, v=0.6)
-    pos_akt = manipulator.get_joints()
-    pos_akt = np.round(pos_akt, 2)
-    joints = np.round(joints, 2)
-    time_before = time.time()
-    while pos_akt[5] != joints[5]:
-        akt_to_round = manipulator.get_joints()
-        pos_akt = np.round(akt_to_round, 2)
-        time_now = time.time()
-        passed = int(time_now - time_before)
-        if passed > 10:
-            return -1
+    joints = manipulator.get_joints()
+    if joints[5] > np.pi or joints[5] < -np.pi:
+        joints = np.delete(joints, 5)
+        joints = np.append(joints, 0)
+        trajectory = list()
+        trajectory.append(joints)
+        manipulator.move(trajectory, is_movej=True, is_pose=False, a=0.2, v=0.6)
+        pos_akt = manipulator.get_joints()
+        pos_akt = np.round(pos_akt, 2)
+        joints = np.round(joints, 2)
+        time_before = time.time()
+        while pos_akt[5] != joints[5]:
+            akt_to_round = manipulator.get_joints()
+            pos_akt = np.round(akt_to_round, 2)
+            time_now = time.time()
+            passed = int(time_now - time_before)
+            if passed > 10:
+                return -1

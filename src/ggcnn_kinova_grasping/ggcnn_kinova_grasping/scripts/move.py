@@ -15,8 +15,8 @@ last_z = 1000
 ok = False
 
 box = tools.set_box(manipulator)
-start = tools.set_start(manipulator)
 table_z = tools.set_table_z(manipulator)
+start = tools.set_start(manipulator)
 tools.check_joints(manipulator)
 
 def convert_pose():
@@ -30,7 +30,7 @@ def move(pose_g):
     global ok
     global time_before
     if not (pose_g.data[0] == 0 or pose_g.data[1] == 0 or pose_g.data[2] <= 0.15 or pose_g.data[2] > last_z):
-        tools.move2(pose_g, manipulator, rot_z=0, a=0.04, v=0.2, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
+        tools.move2(pose_g, manipulator,table_z, rot_z=0, a=0.04, v=0.2, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
         last_z = pose_g.data[2]
         time_before = time.time()
         ok = True
@@ -44,12 +44,13 @@ def move(pose_g):
                 manipulator.grip(0)
                 time.sleep(5)
                 teraz = tools.get_pose(manipulator)
-                teraz[1] -= 10
-                teraz[2] -= 10
+                teraz[0] -= 0.08
+                teraz[1] -= 0.10
+                teraz[2] -= 0.10
                 trajectory = list()
                 trajectory.append(teraz)
                 manipulator.move(trajectory, False, a=0.1, v=0.8)
-                time.sleep(3)
+                time.sleep(4)
                 tools.goto(box, manipulator)
                 tools.goto(start, manipulator)
                 last_z = 1000
