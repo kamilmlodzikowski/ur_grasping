@@ -26,9 +26,6 @@ def move2(pose_g, manipulator, min_z, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211"
 
     akt_matrix = np.matmul(rot_x, orientation_akt)
 
-    if pose_g.data[2]-0.13 > min_z:
-        pose_g.data[2] = min_z + 0.13
-
     pose_ggcnn = [[1, 0, 0, -pose_g.data[0]],
                  [0, 1, 0, -pose_g.data[1]+0.06],
                  [0, 0, 1, pose_g.data[2]-0.13],
@@ -45,7 +42,20 @@ def move2(pose_g, manipulator, min_z, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211"
 
     new_matrix = np.matmul(newish_matrix, orientation_ggcnn)
 
+    rot_x_limit = [[1, 0, 0, 0],
+             [0, 0.707, 0.707, 0],
+             [0, -0.707, 0.707, 0],
+             [0, 0, 0, 1]]
+    inv_mat = np.linalg.inv(rot_x_limit)
+    limit = np.matmul(inv_mat, new_matrix)
+    if limit[2][3] > min_z:
+        limit [2][3] = min_z
+        new_matrix = np.matmul(rot_x_limit, limit)
 
+
+    should_do = np.matmul(inv_mat, akt_matrix)
+    if should_do[2][3] > min_z-0.15:
+        return 0
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
                    [new_matrix[2][0], new_matrix[2][1], new_matrix[2][2]]]
@@ -164,11 +174,12 @@ def set_table_z(manipulator):
              [0, 0.707, 0.707, 0],
              [0, -0.707, 0.707, 0],
              [0, 0, 0, 1]]
+    inv_mat = np.linalg.inv(rot_x)
     akt_pose = [[1, 0, 0, akt_pose[0]],
                 [0, 1, 0, akt_pose[1]],
                 [0, 0, 1, akt_pose[2]],
                 [0, 0, 0, 1]]
-    calc_pose = np.matmul(akt_pose, rot_x)
+    calc_pose = np.matmul(inv_mat, akt_pose)
     return calc_pose[2][3]
 
 
