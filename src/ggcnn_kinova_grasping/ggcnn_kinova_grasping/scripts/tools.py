@@ -162,6 +162,7 @@ def goto(pose, manipulator):
 
     manipulator.grip(150)
     time.sleep(2)
+    return 0
 
 
 def set_table_z(manipulator):
