@@ -49,7 +49,6 @@ fx = K[0]
 cx = K[2]
 fy = K[4]
 cy = K[5]
-print (" KAAAAAA:    ", K)
 
 # Execution Timing
 class TimeIt:

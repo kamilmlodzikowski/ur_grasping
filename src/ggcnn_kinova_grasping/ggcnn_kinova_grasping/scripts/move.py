@@ -30,16 +30,16 @@ def move(pose_g):
     global ok
     global time_before
     if not (pose_g.data[0] == 0 or pose_g.data[1] == 0 or pose_g.data[2] <= 0.15 or pose_g.data[2] > last_z):
-        tools.move2(pose_g, manipulator,table_z, rot_z=0, a=0.04, v=0.2, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True)
-        last_z = pose_g.data[2]
-        time_before = time.time()
-        ok = True
+        if tools.move2(pose_g, manipulator,table_z, rot_z=0, a=0.04, v=0.2, ip="192.168.1.211", port_write=30003, port_read=30002, check_joits_TF=True):
+            last_z = pose_g.data[2]
+            time_before = time.time()
+            ok = True
     else:
         time_now = time.time()
         if ok == True:
             passed = int(time_now - time_before)
             print passed
-            if passed > 5:
+            if passed >= 5:
                 time.sleep(0.5)
                 manipulator.grip(0)
                 time.sleep(5)

@@ -55,7 +55,7 @@ def move2(pose_g, manipulator, min_z, rot_z=0, a=0.08, v=0.5, ip="192.168.1.211"
 
     should_do = np.matmul(inv_mat, akt_matrix)
     if should_do[2][3] > min_z-0.15:
-        return 0
+        return -1
     mat_to_calc = [[new_matrix[0][0], new_matrix[0][1], new_matrix[0][2]],
                    [new_matrix[1][0], new_matrix[1][1], new_matrix[1][2]],
                    [new_matrix[2][0], new_matrix[2][1], new_matrix[2][2]]]
